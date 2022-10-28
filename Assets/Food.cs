@@ -5,6 +5,7 @@ using UnityEngine;
 public class Food : MonoBehaviour
 {
     public bool isOnHand;
+    public float foodAmout;
     void Start()
     {
         float terrainHeight = GameObject.Find("Terrain").GetComponent<Terrain>().SampleHeight(transform.position);

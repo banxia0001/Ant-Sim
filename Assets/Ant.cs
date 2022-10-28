@@ -5,46 +5,75 @@ using UnityEngine.AI;
 
 public class Ant : MonoBehaviour
 {
+    public int teamNum;
+    public int health;
+    public int healthMax;
+    public int attackBonus;
+
+
+    public RectTransform UI;
+    public float baseSpeed; 
+    public float recoverSpeed = 0;
+
     public enum AntState
     {
-       AIthinking, SeekingFood, SendFood, Attack
+       AIthinking, SeekingFood, SendFood, Attack, SeekingEnemy, Flee
     }
     public AntState currentState;
-    public int teamNum;
+
 
     public GameObject foodInNear;
     public GameObject foodInHand;
     public GameObject antQueen;
+    public GameObject enemy;
+    public GameObject deadBody;
 
-    public List<GameObject> foodsInNear;
+    public BarController barController;
 
-    public int health = 5;
-    public float speed = 5f;
+    private List<GameObject> foodsInNear;
+    private List<GameObject> enemiesInNear;
+
+
     private NavMeshAgent agent;
 
-   
-
+    private bool isDead = false;
 
 
     void Start()
     {
-        //GameObject Queen[] = GameObject.FindGameObjectsWithTag("AntQueen");
-        //foreach (GameObject queen in Queen)
-        //{
-        //    if (queen.GetComponent<Queen>().teamNum == this.teamNum) antQueen = queen;
-        //}
+        health = healthMax;
+        barController.SetValue_Initial((float)healthMax);
+        barController.SetValue((float)health, (float)healthMax);
 
+        
+        isDead = false;
         agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
-
+        agent.speed = baseSpeed + 2.5f;
         float terrainHeight = GameObject.Find("Terrain").GetComponent<Terrain>().SampleHeight(transform.position);
         if (terrainHeight > 10f) Destroy(this);
         transform.position = new Vector3(transform.position.x, terrainHeight, transform.position.z);
 
-        currentState = AntState.SeekingFood;
+        //currentState = AntState.SeekingFood;
     }
 
     void FixedUpdate()
     {
+        if (health <= 0 && isDead == false)
+        {
+            isDead = true;
+            if(Random.Range(0,2) > 0) Instantiate(deadBody, this.gameObject.transform.position, Quaternion.identity);
+           
+            Destroy(this.gameObject, .15f);
+        }
+        if (health <= 0) return;
+        if (health <= 10) currentState = AntState.Flee;
+
+        if (enemy != null)
+            if (enemy.GetComponent<Ant>().teamNum == teamNum) enemy = null;
+        if (enemy != null)
+            if(enemy.GetComponent<Ant>().health < 0) enemy = null;
+           
+      
         switch (currentState)
         {
             case AntState.AIthinking:
@@ -59,19 +88,110 @@ public class Ant : MonoBehaviour
                 SendFoodToQueen();
                 break;
 
+            case AntState.SeekingEnemy:
+                
+                On_The_Way_To_Fight();
+                break;
+
             case AntState.Attack:
-                //keepMoving();
+                Attack();
+                break;
+
+            case AntState.Flee:
+                Attack();
                 break;
         }
+        UI.rotation = Quaternion.Euler(90, 0, -this.gameObject.transform.rotation.eulerAngles.z);
 
+        recoverSpeed += 10f * Time.fixedDeltaTime;
+        if (recoverSpeed > 2.5f)
+        {
+            recoverSpeed = 0;
+            health += 3;
+        }
+        if (health > healthMax) health = healthMax;
+        barController.SetValue((float)health, (float)healthMax);
     }
 
+    public void fear()
+    {
+        currentState = AntState.Flee;
+    }
+    private void Flee()
+    {
+        agent.speed = baseSpeed + 6.5f;
+        agent.SetDestination(antQueen.transform.position);
+        health += 2;
+        if(health > 25) currentState = AntState.AIthinking;
+    }
+
+    private void Attack()
+    {
+        agent.speed = 0.25f;
+        if (enemy == null)
+        {
+            currentState = AntState.AIthinking;
+            return;
+        }
+        float dist = Vector3.Distance(enemy.transform.position, this.transform.position);
+        if (dist > 2f) currentState = AntState.SeekingEnemy;
+
+  
+        enemy.GetComponent<Ant>().GetDamage(Random.Range(1, 2) + attackBonus, this.gameObject);
+        agent.SetDestination(enemy.transform.position);
+    }
+
+    public void GetDamage(int num, GameObject attacker)
+    {
+        health -= num;
+      
+        if (currentState == AntState.SeekingEnemy) enemy = attacker;
+        if (currentState == AntState.SeekingFood)
+        {
+            currentState = AntState.SeekingEnemy;
+            enemy = attacker; 
+        }
+    }
+
+    private void On_The_Way_To_Fight()
+    {
+        agent.speed = baseSpeed + 5.5f;
+        if (enemy == null) Fight_Choice();
+
+        if (enemy != null)
+        {
+            agent.SetDestination(enemy.transform.position);
+
+            float dist = Vector3.Distance(enemy.transform.position, this.transform.position);
+
+            if (dist < 2f)
+            {
+               
+                currentState = AntState.Attack;
+            }
+        }
+    }
+
+    private void Fight_Choice()
+    {
+        if (enemiesInNear != null)enemiesInNear.Clear();
+
+        enemiesInNear = FindNearAntsWithTag("Ant");
+
+        if (enemiesInNear == null) 
+        {
+            currentState = AntState.AIthinking;
+            return;
+        }
+        enemy = enemiesInNear[Random.Range(0, enemiesInNear.Count)];
+    }
 
     private void DecideWhatToDoNext()
     {
+        agent.speed = baseSpeed + 2.5f;
         int choice = Random.Range(0, 2);
         if(choice == 0) currentState = AntState.SeekingFood;
-        //if(choice == 1) currentState = AntState.SeekingFood;
+        if(choice == 1) currentState = AntState.SeekingEnemy;
     }
 
 
@@ -89,18 +209,22 @@ public class Ant : MonoBehaviour
         {
             choose_A_Food_ToMove();
         }
-        if (foodInNear.GetComponent<Food>().isOnHand == true)
-        {
-            choose_A_Food_ToMove();
-        }
 
-        agent.SetDestination(foodInNear.transform.position);
+        if (foodInNear != null)
+        {
+            if (foodInNear.GetComponent<Food>().isOnHand == true) choose_A_Food_ToMove();
+            if (foodInNear != null)
+                agent.SetDestination(foodInNear.transform.position);
+
+        }
     }
 
     public void getFood(GameObject food)
     {
         if (foodInHand == null)
         {
+            agent.speed = baseSpeed;
+
             foodInHand = food;
             foodInHand.transform.SetParent(null);
             foodInHand.transform.SetParent(gameObject.transform);
@@ -118,7 +242,8 @@ public class Ant : MonoBehaviour
     private void choose_A_Food_ToMove()
     {
         foodsInNear = FindNearObjectsWithTag("Food");
-        foodInNear = foodsInNear[Random.Range(0, foodsInNear.Count)];
+        if (foodsInNear != null) foodInNear = foodsInNear[Random.Range(0, foodsInNear.Count)];
+        else currentState = AntState.SeekingEnemy;  
     }
 
     private List<GameObject> FindNearObjectsWithTag(string tag)
@@ -168,6 +293,54 @@ public class Ant : MonoBehaviour
     }
 
 
+    private List<GameObject> FindNearAntsWithTag(string tag)
+    {
+        GameObject[] objectWithTag = GameObject.FindGameObjectsWithTag(tag);
+        if (objectWithTag.Length == 0)
+            return null;
+
+        List<GameObject> check = new List<GameObject>();
+
+        for (int i2 = 0; i2 < 3; i2++)
+        {
+            GameObject closestObject = objectWithTag[0];
+
+            float distanceToClosestObject = 1e6f,
+                  distanceToCurrentObject;
+
+            for (int i = 0; i < objectWithTag.Length; i++)
+            {
+                Vector3 vectorToCurrent;
+                GameObject currentObject;
+                currentObject = objectWithTag[i];
+                vectorToCurrent = currentObject.transform.position - transform.position;
+                distanceToCurrentObject = vectorToCurrent.magnitude;
+
+                if (distanceToCurrentObject < distanceToClosestObject)
+                    if (currentObject.GetComponent<Ant>() != null)
+                        if (currentObject.GetComponent<Ant>().teamNum != teamNum)
+                        {
+                            bool isInList = false;
+                            if (check != null)
+                                if (check.Count > 0)
+                                    for (int i1 = 0; i1 < check.Count; i1++)
+                                    {
+                                        if (check[i1] == objectWithTag[i]) isInList = true;
+                                    }
+
+                            if (isInList == false)
+                            {
+                                closestObject = objectWithTag[i];
+                                distanceToClosestObject = distanceToCurrentObject;
+                            }
+                        }
+            }
+            check.Add(closestObject);
+        }
+        return check;
+    }
+
+
     public void OnTriggerEnter(Collider other)
     {
         if(currentState == AntState.SendFood)
@@ -178,11 +351,28 @@ public class Ant : MonoBehaviour
                 if (foodInHand != null && teamNum == queen.teamNum)
                 {
                     currentState = AntState.AIthinking;
+                    queen.birthCD += foodInHand.GetComponent<Food>().foodAmout;
                     Destroy(foodInHand);
+                    agent.speed = baseSpeed + 2.5f;
                     foodInNear = null;
-                    queen.birth();
+                    //queen.birth();
                 }
             }
+
+
+        if (other.tag == "Ant")
+        {
+            if (other.GetComponent<Ant>() != null)
+            {
+                Ant ant = other.GetComponent<Ant>();
+                if (ant.teamNum != this.teamNum)
+                {
+                    enemy = other.gameObject;
+                    currentState = AntState.Attack;
+                }
+            }
+         
+        }
     }
 }
 
