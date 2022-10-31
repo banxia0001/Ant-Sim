@@ -148,8 +148,9 @@ MonoBehaviour:
   healthMax: 100
   attackBonus: 0
   UI: {fileID: 1933808785476145808}
-  baseSpeed: 4
+  baseSpeed: 2
   recoverSpeed: 0
+  fleeTime: 0
   currentState: 0
   foodInNear: {fileID: 0}
   foodInHand: {fileID: 0}

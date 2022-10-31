@@ -20,8 +20,6 @@ public class Queen : MonoBehaviour
 
     void Start()
     {
-
-        
         barController.SetValue_Initial(0);
         barController.SetValue((float)birthCD, 15f);
         float terrainHeight = GameObject.Find("Terrain").GetComponent<Terrain>().SampleHeight(transform.position);
@@ -68,11 +66,10 @@ public class Queen : MonoBehaviour
     public void birth()
     {
         GameObject pref = AntPrefab;
-        if (Random.Range(0, 10) == 1) pref = GiantAntPrefab;
+        if (Random.Range(0, 5) == 1) pref = GiantAntPrefab;
          GameObject antBirthed = Instantiate(pref, new Vector3(Ass.transform.position.x, 0.5f, Ass.transform.position.z), Quaternion.identity) as GameObject;
         antBirthed.GetComponent<Ant>().teamNum = this.teamNum;
         antBirthed.GetComponent<Ant>().antQueen = this.gameObject;
-
     }
 
 
@@ -85,7 +82,7 @@ public class Queen : MonoBehaviour
             if (ant.teamNum != this.teamNum)
             {
                 ant.health -= 10;
-                ant.fear();
+                ant.enterFlee();
             }
         }
     }

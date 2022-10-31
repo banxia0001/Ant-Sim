@@ -14,6 +14,7 @@ public class Ant : MonoBehaviour
     public RectTransform UI;
     public float baseSpeed; 
     public float recoverSpeed = 0;
+    public float fleeTime;
 
     public enum AntState
     {
@@ -41,6 +42,8 @@ public class Ant : MonoBehaviour
 
     void Start()
     {
+        GameObject.FindGameObjectWithTag("GameController").GetComponent<WorldController>().antGetIntoList(teamNum, this);
+
         health = healthMax;
         barController.SetValue_Initial((float)healthMax);
         barController.SetValue((float)health, (float)healthMax);
@@ -56,17 +59,37 @@ public class Ant : MonoBehaviour
         //currentState = AntState.SeekingFood;
     }
 
+    public void changeAIState(string command)
+    { 
+        if(command == "attack") currentState = AntState.SeekingEnemy;
+        if (command == "defend") enterFlee();
+        if (command == "farm") currentState = AntState.SeekingFood;
+    }
+
+    public void enterFlee()
+    {
+        fleeTime = 10f;
+        currentState = AntState.Flee;
+    }
+
+   
     void FixedUpdate()
     {
+        fleeTime -= Time.fixedDeltaTime;
+
         if (health <= 0 && isDead == false)
         {
+            GameObject.FindGameObjectWithTag("GameController").GetComponent<WorldController>().antDelete(teamNum, this); 
+
             isDead = true;
             if(Random.Range(0,2) > 0) Instantiate(deadBody, this.gameObject.transform.position, Quaternion.identity);
-           
             Destroy(this.gameObject, .15f);
         }
         if (health <= 0) return;
-        if (health <= 10) currentState = AntState.Flee;
+        if (health <= 10)
+        {
+            enterFlee();
+        }
 
         if (enemy != null)
             if (enemy.GetComponent<Ant>().teamNum == teamNum) enemy = null;
@@ -89,16 +112,18 @@ public class Ant : MonoBehaviour
                 break;
 
             case AntState.SeekingEnemy:
-                
+                checkFood();
                 On_The_Way_To_Fight();
                 break;
 
             case AntState.Attack:
+                checkFood();
                 Attack();
                 break;
 
             case AntState.Flee:
-                Attack();
+                checkFood();
+                Flee();
                 break;
         }
         UI.rotation = Quaternion.Euler(90, 0, -this.gameObject.transform.rotation.eulerAngles.z);
@@ -113,16 +138,12 @@ public class Ant : MonoBehaviour
         barController.SetValue((float)health, (float)healthMax);
     }
 
-    public void fear()
-    {
-        currentState = AntState.Flee;
-    }
     private void Flee()
     {
-        agent.speed = baseSpeed + 6.5f;
+        agent.speed = baseSpeed + 3.5f;
         agent.SetDestination(antQueen.transform.position);
         health += 2;
-        if(health > 25) currentState = AntState.AIthinking;
+        if(fleeTime < 0) currentState = AntState.AIthinking;
     }
 
     private void Attack()
@@ -137,7 +158,7 @@ public class Ant : MonoBehaviour
         if (dist > 2f) currentState = AntState.SeekingEnemy;
 
   
-        enemy.GetComponent<Ant>().GetDamage(Random.Range(1, 2) + attackBonus, this.gameObject);
+        enemy.GetComponent<Ant>().GetDamage(Random.Range(0, 2) + attackBonus, this.gameObject);
         agent.SetDestination(enemy.transform.position);
     }
 
@@ -155,7 +176,7 @@ public class Ant : MonoBehaviour
 
     private void On_The_Way_To_Fight()
     {
-        agent.speed = baseSpeed + 5.5f;
+        agent.speed = baseSpeed + 2.5f;
         if (enemy == null) Fight_Choice();
 
         if (enemy != null)
@@ -188,10 +209,10 @@ public class Ant : MonoBehaviour
 
     private void DecideWhatToDoNext()
     {
-        agent.speed = baseSpeed + 2.5f;
-        int choice = Random.Range(0, 2);
-        if(choice == 0) currentState = AntState.SeekingFood;
-        if(choice == 1) currentState = AntState.SeekingEnemy;
+        agent.speed = baseSpeed;
+        int choice = Random.Range(0, 3);
+        if(choice == 0 || choice == 1) currentState = AntState.SeekingFood;
+        if(choice == 2) currentState = AntState.SeekingEnemy;
     }
 
 
@@ -223,7 +244,7 @@ public class Ant : MonoBehaviour
     {
         if (foodInHand == null)
         {
-            agent.speed = baseSpeed;
+            agent.speed = baseSpeed + -0.25f;
 
             foodInHand = food;
             foodInHand.transform.SetParent(null);
@@ -233,7 +254,17 @@ public class Ant : MonoBehaviour
             currentState = AntState.SendFood;
         }
     }
-
+    private void checkFood()
+    {
+        if (foodInHand == true)
+        {
+            if (foodInHand != null)
+            {
+                foodInHand.transform.SetParent(null);
+                foodInHand = null;
+            }
+        }
+    }
     private void SendFoodToQueen()
     {
         agent.SetDestination(antQueen.transform.position);
