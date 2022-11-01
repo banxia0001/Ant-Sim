@@ -79,11 +79,12 @@ public class Queen : MonoBehaviour
         if (other.tag == "Ant")
         {
             Ant ant = other.GetComponent<Ant>();
-            if (ant.teamNum != this.teamNum)
-            {
-                ant.health -= 10;
-                ant.enterFlee();
-            }
+            if (ant != null)
+                if (ant.teamNum != this.teamNum)
+                {
+                    ant.health -= 10;
+                    ant.enterFlee();
+                }
         }
     }
 

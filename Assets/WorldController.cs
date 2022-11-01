@@ -11,8 +11,7 @@ public class WorldController : MonoBehaviour
     public GameObject[] pos;
 
     public Queen[] queens;
-    public InputField InputText;
-    public string[] InputWords;
+  
     void Start()
     {
         //GameObject[] antAll = GameObject.FindGameObjectsWithTag("Ant");
@@ -35,9 +34,12 @@ public class WorldController : MonoBehaviour
         if (team == 0) ant0List.Remove(ant);
         if (team == 1) ant1List.Remove(ant);
     }
+
+    public InputField InputText;
+    public string[] InputWords;
+
     void Update()
     {
-
         if (Input.GetKeyDown(KeyCode.Return))
         {
             Debug.Log(InputText.text);
@@ -45,8 +47,6 @@ public class WorldController : MonoBehaviour
             InputText.text = "";
             InputText.ActivateInputField();
         }
-
-      
     }
 
     public void ImportString(string InputWord)
