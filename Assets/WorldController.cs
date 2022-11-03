@@ -72,10 +72,13 @@ public class WorldController : MonoBehaviour
         {
             Length++;
         }
-        Debug.Log(Length);
+        //Debug.Log(Length);
         if (Length == 1) OrderT1(InputWords);
         if (Length == 2) OrderT0(InputWords);
-        if (Length > 2) OrderT3(InputWords);
+        if (Length > 2)
+        {
+            specialOrderToOneAnt(findASpeicalAnt(InputWords, 0, 1), InputWords);
+        }
     }
     public void OrderT2(string[] InputWords)
     {
@@ -96,36 +99,68 @@ public class WorldController : MonoBehaviour
         }
     }
 
-    public void OrderT3(string[] InputWords)
+    private Ant findASpeicalAnt(string[] InputWords, int N1, int N2)
     {
         Ant antThis = null;
-        if (InputWords[0] == "a")
+        if (InputWords[N1] == "a")
         {
-            Debug.Log("teamA");
+            //Debug.Log("teamA");
             for (int i5 = 0; i5 < ant0List.Count; i5++)
             {
-                if (ant0List[i5].antOrder.ToString() == InputWords[1])
+                if (ant0List[i5].antOrder.ToString() == InputWords[N2])
                 {
-                    specialOrderToOneAnt(ant0List[i5], InputWords);
+                    return ant0List[i5];
                     break;
                 }
             }
-            return;
+            return antThis;
         }
 
-        if (InputWords[0] == "b")
+        if (InputWords[N1] == "b")
         {
             for (int i6 = 0; i6 < ant1List.Count; i6++)
             {
-                if (ant0List[i6].antOrder.ToString() == InputWords[1])
+                if (ant0List[i6].antOrder.ToString() == InputWords[N2])
                 {
-                    specialOrderToOneAnt(ant0List[i6], InputWords);
+                    return ant0List[i6];
                     break;
                 }
             }
-            return;
+            return antThis;
         }
+
+        return antThis;
     }
+    //public void OrderT3(string[] InputWords)
+    //{
+    //    Ant antThis = null;
+    //    if (InputWords[0] == "a")
+    //    {
+    //        Debug.Log("teamA");
+    //        for (int i5 = 0; i5 < ant0List.Count; i5++)
+    //        {
+    //            if (ant0List[i5].antOrder.ToString() == InputWords[1])
+    //            {
+    //                specialOrderToOneAnt(ant0List[i5], InputWords);
+    //                break;
+    //            }
+    //        }
+    //        return;
+    //    }
+
+    //    if (InputWords[0] == "b")
+    //    {
+    //        for (int i6 = 0; i6 < ant1List.Count; i6++)
+    //        {
+    //            if (ant0List[i6].antOrder.ToString() == InputWords[1])
+    //            {
+    //                specialOrderToOneAnt(ant0List[i6], InputWords);
+    //                break;
+    //            }
+    //        }
+    //        return;
+    //    }
+    //}
     public void OrderT0(string[] InputWords)
     {
 
@@ -162,10 +197,33 @@ public class WorldController : MonoBehaviour
 
         if (InputWords[2] == "name")
         {
-            Debug.Log("teamA Name");
             ant.antSpecialName = "бо" + InputWords[3] + "'";
+            return;
         }
-    
+
+
+        if (InputWords[2] == "health")
+        {
+            ant.health += 20;
+            return;
+        }
+
+        int Length = 0;
+        foreach (string token in InputWords)
+        {
+            Length++;
+        }
+
+        if (InputWords[2] == "attack" && Length > 3)
+        {
+            Debug.Log(InputWords[3] + findASpeicalAnt(InputWords, 3, 4).antOrder);
+            ant.enemy = findASpeicalAnt(InputWords, 3, 4).gameObject;
+            ant.changeAIState(InputWords[2]);
+            return;
+        }
+
+        ant.changeAIState(InputWords[2]);
+
     }
     public void OrderT1(string[] InputWords)
     {
