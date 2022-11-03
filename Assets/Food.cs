@@ -9,7 +9,7 @@ public class Food : MonoBehaviour
     void Start()
     {
         float terrainHeight = GameObject.Find("Terrain").GetComponent<Terrain>().SampleHeight(transform.position);
-        if (terrainHeight > 10f) Destroy(this);
+        if (terrainHeight > 1.4f) Destroy(this);
         transform.position = new Vector3(transform.position.x, terrainHeight, transform.position.z);
     }
 

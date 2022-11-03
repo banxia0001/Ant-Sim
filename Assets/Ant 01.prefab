@@ -63,9 +63,17 @@ PrefabInstance:
       propertyPath: deadBody
       value: 
       objectReference: {fileID: 5117828281463775305, guid: efaef0b751ef050478827ced14f7fb47, type: 3}
+    - target: {fileID: 178804694018851037, guid: 7a855de1e99d0154d857a6e81d6d9e75, type: 3}
+      propertyPath: baseSpeed
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 178804694018851039, guid: 7a855de1e99d0154d857a6e81d6d9e75, type: 3}
       propertyPath: m_Name
       value: Ant 01
+      objectReference: {fileID: 0}
+    - target: {fileID: 1933808785476145808, guid: 7a855de1e99d0154d857a6e81d6d9e75, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.08
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7a855de1e99d0154d857a6e81d6d9e75, type: 3}

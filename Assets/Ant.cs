@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using TMPro;
+
 
 public class Ant : MonoBehaviour
 {
@@ -34,17 +36,23 @@ public class Ant : MonoBehaviour
     private List<GameObject> foodsInNear;
     private List<GameObject> enemiesInNear;
 
+    public WorldController WC;
+
 
     private NavMeshAgent agent;
 
     private bool isDead = false;
 
-
+    public int antOrder;
+    public string antSpecialName;
+    public TMP_Text name1,name2;
     void Start()
     {
-        GameObject.FindGameObjectWithTag("GameController").GetComponent<WorldController>().antGetIntoList(teamNum, this);
+        WC = GameObject.FindGameObjectWithTag("GameController").GetComponent<WorldController>();
+        WC.antGetIntoList(teamNum, this);
+     
 
-        health = healthMax;
+         health = healthMax;
         barController.SetValue_Initial((float)healthMax);
         barController.SetValue((float)health, (float)healthMax);
 
@@ -72,9 +80,50 @@ public class Ant : MonoBehaviour
         currentState = AntState.Flee;
     }
 
+    private void UpdateState()
+    {
+        string myStateString = "";
+        string myTeamString = "A";
+        if (teamNum == 1) myTeamString = "B";
+
+        switch (currentState)
+        {
+            case AntState.AIthinking:
+                myStateString = "thinking";
+                break;
+
+            case AntState.SeekingFood:
+                myStateString = "farming";
+                break;
+
+            case AntState.SendFood:
+                myStateString = "farming";
+                break;
+
+            case AntState.SeekingEnemy:
+                myStateString = "attack";
+                break;
+
+            case AntState.Attack:
+                myStateString = "attack";
+                break;
+
+            case AntState.Flee:
+                myStateString = "flee";
+                break;
+        }
+
+        name1.text = myTeamString + " " + antOrder +": " + myStateString;
+    }
    
     void FixedUpdate()
     {
+        //change UI state and name
+        UpdateState();
+        //change special name
+        if (antSpecialName == null) name2.text = "null";
+        else name2.text = antSpecialName;
+
         fleeTime -= Time.fixedDeltaTime;
 
         if (health <= 0 && isDead == false)
@@ -142,7 +191,6 @@ public class Ant : MonoBehaviour
     {
         agent.speed = baseSpeed + 1.5f;
         agent.SetDestination(antQueen.transform.position);
-        health += 1;
         if(fleeTime < 0) currentState = AntState.AIthinking;
     }
 
@@ -176,7 +224,7 @@ public class Ant : MonoBehaviour
 
     private void On_The_Way_To_Fight()
     {
-        agent.speed = baseSpeed + 2.5f;
+        agent.speed = baseSpeed + 1.75f;
         if (enemy == null) Fight_Choice();
 
         if (enemy != null)
@@ -244,7 +292,7 @@ public class Ant : MonoBehaviour
     {
         if (foodInHand == null)
         {
-            agent.speed = baseSpeed + -0.25f;
+            agent.speed = baseSpeed -0.25f;
 
             foodInHand = food;
             foodInHand.transform.SetParent(null);
@@ -300,7 +348,7 @@ public class Ant : MonoBehaviour
                 vectorToCurrent = currentObject.transform.position - transform.position;
                 distanceToCurrentObject = vectorToCurrent.magnitude;
 
-
+                if (currentObject.GetComponent<Food>() == null) continue;
                 if (distanceToCurrentObject < distanceToClosestObject && currentObject.GetComponent<Food>().isOnHand == false)
                 {
                     bool isInList = false;

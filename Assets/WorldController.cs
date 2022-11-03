@@ -11,6 +11,9 @@ public class WorldController : MonoBehaviour
     public GameObject[] pos;
 
     public Queen[] queens;
+
+    public int ant0Order;
+    public int ant1Order;
   
     void Start()
     {
@@ -25,8 +28,18 @@ public class WorldController : MonoBehaviour
 
     public void antGetIntoList(int team, Ant ant)
     {
-        if (team == 0) ant0List.Add(ant);
-        if (team == 1) ant1List.Add(ant);
+        if (team == 0)
+        {
+            ant0List.Add(ant);
+            ant0Order++;
+            ant.antOrder = ant0Order;
+        }
+        if (team == 1)
+        {
+            ant1List.Add(ant);
+            ant1Order++;
+            ant.antOrder = ant1Order;
+        }
     }   
 
     public void antDelete(int team, Ant ant)
@@ -62,6 +75,7 @@ public class WorldController : MonoBehaviour
         Debug.Log(Length);
         if (Length == 1) OrderT1(InputWords);
         if (Length == 2) OrderT0(InputWords);
+        if (Length > 2) OrderT3(InputWords);
     }
     public void OrderT2(string[] InputWords)
     {
@@ -81,14 +95,47 @@ public class WorldController : MonoBehaviour
             }
         }
     }
+
+    public void OrderT3(string[] InputWords)
+    {
+        Ant antThis = null;
+        if (InputWords[0] == "a")
+        {
+            Debug.Log("teamA");
+            for (int i5 = 0; i5 < ant0List.Count; i5++)
+            {
+                if (ant0List[i5].antOrder.ToString() == InputWords[1])
+                {
+                    specialOrderToOneAnt(ant0List[i5], InputWords);
+                    break;
+                }
+            }
+            return;
+        }
+
+        if (InputWords[0] == "b")
+        {
+            for (int i6 = 0; i6 < ant1List.Count; i6++)
+            {
+                if (ant0List[i6].antOrder.ToString() == InputWords[1])
+                {
+                    specialOrderToOneAnt(ant0List[i6], InputWords);
+                    break;
+                }
+            }
+            return;
+        }
+    }
     public void OrderT0(string[] InputWords)
     {
+
         if (InputWords[1] == "birth")
         {
             int queenNum = 0;
             if (InputWords[0] == "blue") queenNum = 0;
             else queenNum = 1;
             queens[queenNum].birth();
+            return;
         }
 
         if (InputWords[0] == "blue")
@@ -97,6 +144,7 @@ public class WorldController : MonoBehaviour
             {
                 ant0List[Random.Range(0, ant0List.Count)].changeAIState(InputWords[1]);
             }
+            return;
         }
 
         if (InputWords[0] == "red")
@@ -105,9 +153,20 @@ public class WorldController : MonoBehaviour
             {
                 ant1List[Random.Range(0, ant1List.Count)].changeAIState(InputWords[1]);
             }
+            return;
         }
     }
 
+    public void specialOrderToOneAnt(Ant ant, string[] InputWords)
+    {
+
+        if (InputWords[2] == "name")
+        {
+            Debug.Log("teamA Name");
+            ant.antSpecialName = "бо" + InputWords[3] + "'";
+        }
+    
+    }
     public void OrderT1(string[] InputWords)
     {
         if (InputWords[0] == "food")
