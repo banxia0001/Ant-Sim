@@ -338,7 +338,7 @@ MonoBehaviour:
     2.A
     5 health
 
-    3.A 5 attack/defend/farm
+    3.A 5 attack/flee/farm
 
     4.A 5 attack B 1'
   m_isRightToLeft: 0
@@ -1867,11 +1867,11 @@ MonoBehaviour:
     1.blue/red
     attack
 
-    2.blue/red defend
+    2.blue/red flee
 
     3.blue/red farm
 
-    4.blue/red birth
+    4.blue/red birthBonus
 
 '
   m_isRightToLeft: 0

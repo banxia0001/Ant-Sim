@@ -17,6 +17,8 @@ public class Ant : MonoBehaviour
     public float baseSpeed; 
     public float recoverSpeed = 0;
     public float fleeTime;
+    private float fleeSpeedBonus;
+
 
     public enum AntState
     {
@@ -70,18 +72,21 @@ public class Ant : MonoBehaviour
     public void changeAIState(string command)
     { 
         if(command == "attack") currentState = AntState.SeekingEnemy;
-        if (command == "defend") enterFlee();
+        if (command == "flee") enterFlee();
         if (command == "farm") currentState = AntState.SeekingFood;
     }
 
     public void enterFlee()
     {
         fleeTime = 10f;
+        fleeSpeedBonus = 10f;
         currentState = AntState.Flee;
     }
 
     private void UpdateState()
     {
+       
+
         string myStateString = "";
         string myTeamString = "A";
         if (teamNum == 1) myTeamString = "B";
@@ -125,6 +130,7 @@ public class Ant : MonoBehaviour
         else name2.text = antSpecialName;
 
         fleeTime -= Time.fixedDeltaTime;
+        if (fleeSpeedBonus < 0) fleeSpeedBonus = 0;
 
         if (health <= 0 && isDead == false)
         {
@@ -189,7 +195,8 @@ public class Ant : MonoBehaviour
 
     private void Flee()
     {
-        agent.speed = baseSpeed + 1.5f;
+        fleeSpeedBonus -= .15f;
+        agent.speed = baseSpeed + fleeSpeedBonus;
         agent.SetDestination(antQueen.transform.position);
         if(fleeTime < 0) currentState = AntState.AIthinking;
     }

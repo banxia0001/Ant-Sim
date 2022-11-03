@@ -77,7 +77,9 @@ public class WorldController : MonoBehaviour
         if (Length == 2) OrderT0(InputWords);
         if (Length > 2)
         {
-            specialOrderToOneAnt(findASpeicalAnt(InputWords, 0, 1), InputWords);
+            Ant thisAnt = findASpeicalAnt(InputWords, 0, 1);
+            if (thisAnt != null)
+                specialOrderToOneAnt(findASpeicalAnt(InputWords, 0, 1), InputWords);
         }
     }
     public void OrderT2(string[] InputWords)
@@ -120,9 +122,9 @@ public class WorldController : MonoBehaviour
         {
             for (int i6 = 0; i6 < ant1List.Count; i6++)
             {
-                if (ant0List[i6].antOrder.ToString() == InputWords[N2])
+                if (ant1List[i6].antOrder.ToString() == InputWords[N2])
                 {
-                    return ant0List[i6];
+                    return ant1List[i6];
                     break;
                 }
             }
@@ -163,13 +165,12 @@ public class WorldController : MonoBehaviour
     //}
     public void OrderT0(string[] InputWords)
     {
-
-        if (InputWords[1] == "birth")
+        if (InputWords[1] == "birthbonus")
         {
             int queenNum = 0;
             if (InputWords[0] == "blue") queenNum = 0;
             else queenNum = 1;
-            queens[queenNum].birth();
+            queens[queenNum].birthCD += 7.5f;
             return;
         }
 
@@ -216,10 +217,13 @@ public class WorldController : MonoBehaviour
 
         if (InputWords[2] == "attack" && Length > 3)
         {
-            Debug.Log(InputWords[3] + findASpeicalAnt(InputWords, 3, 4).antOrder);
-            ant.enemy = findASpeicalAnt(InputWords, 3, 4).gameObject;
-            ant.changeAIState(InputWords[2]);
-            return;
+            Ant thisAnt = findASpeicalAnt(InputWords, 3, 4);
+            if (thisAnt != null)
+            {
+                ant.enemy = findASpeicalAnt(InputWords, 3, 4).gameObject;
+                ant.changeAIState(InputWords[2]);
+                return;
+            }
         }
 
         ant.changeAIState(InputWords[2]);
