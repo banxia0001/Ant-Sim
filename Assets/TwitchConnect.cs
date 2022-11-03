@@ -7,6 +7,7 @@ using System.IO;
 
 public class TwitchConnect : MonoBehaviour
 {
+    public WorldController wc;
     /// <summary>
     /// BASIC TERMS
     //TCP stands for transmission Control Protocol
@@ -33,13 +34,13 @@ public class TwitchConnect : MonoBehaviour
     const int PORT = 6667;
 
     //put your twitch username here - make a new account for security reasons - i don't understand why but it's recommended
-    string User = "soomoh";
+    string User = "laltrogames";
     
     //copy and paste OAuth from     twitchapps.com/tmi
-    string OAuth = "oauth:kodi1ouc09l33y2idxkxgqkkyd8hap";  //your OAuth is basically as good as a password, so you should make a new account before doing this
+    string OAuth = "oauth:cg1x2qedawxkfnf8lalzgt681ijd54";  //your OAuth is basically as good as a password, so you should make a new account before doing this
 
     //this is the channel you want to connect to
-    string Channel = "soomoh";
+    string Channel = "laltrogames";
 
     float pingCounter;
 
@@ -104,30 +105,29 @@ public class TwitchConnect : MonoBehaviour
                 //etc, etc
 
                 print(msg);
-
-                //if(msg == "a")
+                wc.ImportString(msg);
+                //if (msg == "blue kill")
                 //{
-                //    Debug.Log("someone pressed A");
-                //    GameObject.FindObjectOfType<GameManager>().GetComponent<GameManager>().A_Pressed();
+                //    WorldController.FindObjectOfType<WorldController>().ImportString(InputWord);
                 //}
 
-                //if (msg == "d")
-                //{
-                //    Debug.Log("someone pressed D");
-                //    GameObject.FindObjectOfType<GameManager>().GetComponent<GameManager>().D_Pressed();
-                //}
+                ////if (msg == "d")
+                ////{
+                ////    Debug.Log("someone pressed D");
+                ////    GameObject.FindObjectOfType<GameManager>().GetComponent<GameManager>().D_Pressed();
+                ////}
 
-                //if (msg == "w")
-                //{
-                //    Debug.Log("someone pressed W");
-                //    GameObject.FindObjectOfType<GameManager>().GetComponent<GameManager>().W_Pressed();
-                //}
+                ////if (msg == "w")
+                ////{
+                ////    Debug.Log("someone pressed W");
+                ////    GameObject.FindObjectOfType<GameManager>().GetComponent<GameManager>().W_Pressed();
+                ////}
 
-                //if (msg == "s")
-                //{
-                //    Debug.Log("someone pressed S");
-                //    GameObject.FindObjectOfType<GameManager>().GetComponent<GameManager>().S_Pressed();
-                //}
+                ////if (msg == "s")
+                ////{
+                ////    Debug.Log("someone pressed S");
+                ////    GameObject.FindObjectOfType<GameManager>().GetComponent<GameManager>().S_Pressed();
+                ////}
             }
         }
     }

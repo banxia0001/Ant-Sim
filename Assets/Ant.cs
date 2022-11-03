@@ -140,9 +140,9 @@ public class Ant : MonoBehaviour
 
     private void Flee()
     {
-        agent.speed = baseSpeed + 3.5f;
+        agent.speed = baseSpeed + 1.5f;
         agent.SetDestination(antQueen.transform.position);
-        health += 2;
+        health += 1;
         if(fleeTime < 0) currentState = AntState.AIthinking;
     }
 
